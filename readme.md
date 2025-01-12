@@ -1,7 +1,7 @@
 Create a new basic app using `npx @oracle/ojet-cli create JET-Virtual-DOM-app --template=basic --vdom`<br>
 There are other templates also available
 
-Install (if existing OJET) by using `npm install`
+Install (if existing OJET) by using `npm install` OR `npx @oracle/ojet-cli restore`
 
 Start with `npx ojet serve`
 
