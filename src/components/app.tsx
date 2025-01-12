@@ -11,7 +11,7 @@ import { useEffect } from "preact/hooks";
 import Context = require("ojs/ojcontext");
 import { Footer } from "./footer";
 import { Header } from "./header";
-import { Content } from "./content/index";
+import Content from "./Content/Content"
 // import { Content } from "./content/badIndex";
 
 type Props = Readonly<{

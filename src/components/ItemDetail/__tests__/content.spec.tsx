@@ -1,6 +1,6 @@
 import { h } from "preact";
 import { render } from "@testing-library/preact";
-import { Content } from "../index";
+import ItemDetailContainer from "../ItemDetailContainer";
 
 jest.mock("../../store_data.json", () => [
     { id: 1, name: "Baseball", short_desc: "A bat-and-ball game" },
@@ -26,7 +26,7 @@ jest.mock("ojs/ojmutablearraydataprovider", () => {
 describe("Test suite for Content component", () => {
 
     test("Renders Product Information header with a H1 tag", () => {
-        const { getByText } = render(<Content />);
+        const { getByText } = render(<ItemDetailContainer />);
         const headerElement = getByText("Product Information");
         expect(headerElement.tagName).toBe("H1");
     });

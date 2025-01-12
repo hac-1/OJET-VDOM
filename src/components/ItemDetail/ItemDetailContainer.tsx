@@ -87,27 +87,27 @@ const ItemDetailContainer = () => {
   };
 
 
-  // Function on how to render a list item - will be used in template
-  const renderListItem =
-    (item: ojListView.ItemTemplateContext<Activity["id"], Activity>
-    ) => {
-      return (
-        <li>
-          <oj-list-item-layout>
-            <div class="oj-typography-body-md">
-              {item.data.name}
-            </div>
-          </oj-list-item-layout>
-        </li>
-      );
-    };
+  // // Function on how to render a list item - will be used in template
+  // const renderListItem =
+  //   (item: ojListView.ItemTemplateContext<Activity["id"], Activity>
+  //   ) => {
+  //     return (
+  //       <li>
+  //         <oj-list-item-layout>
+  //           <div class="oj-typography-body-md">
+  //             {item.data.name}
+  //           </div>
+  //         </oj-list-item-layout>
+  //       </li>
+  //     );
+  //   };
 
   return (
     <div class="oj-web-applayout-max-width oj-web-applayout-content">
       <h1>Product Information</h1>
 
 
-      <div id="activitiesContainer">
+      {/* <div id="activitiesContainer">
         <oj-list-view id="activitiesList"
           aria-labelledby="activitiesHeader"
           data={activityDataProvider}
@@ -115,9 +115,9 @@ const ItemDetailContainer = () => {
         >
           <template slot="itemTemplate" render={renderListItem}></template>
         </oj-list-view>
-      </div>
+      </div> */}
 
-      <div id="itemDetailsContainer">
+      <div id="itemDetailsContainer" class="oj-bg-neutral-30">
         {/*  Simple example of using components and using useState/useCallback to pass data in same page level*/}
         <h3>Item Details</h3>
         <oj-label for={"basicSelect"}>Select Chart</oj-label>
