@@ -25,10 +25,10 @@ jest.mock("ojs/ojmutablearraydataprovider", () => {
 
 describe("Test suite for Content component", () => {
 
-    test("Renders Product Information header with a H1 tag", () => {
+    test("Renders Item Details header with a H3 tag", () => {
         const { getByText } = render(<ItemDetailContainer />);
-        const headerElement = getByText("Product Information");
-        expect(headerElement.tagName).toBe("H1");
+        const headerElement = getByText("Item Details");
+        expect(headerElement.tagName).toBe("H3");
     });
 
 })

@@ -104,7 +104,7 @@ const ItemDetailContainer = () => {
 
   return (
     <div class="oj-web-applayout-max-width oj-web-applayout-content">
-      <h1>Product Information</h1>
+      {/* <h1>Product Information</h1> */}
 
 
       {/* <div id="activitiesContainer">
