@@ -64,7 +64,7 @@ const activityDataProvider = new MutableArrayDataProvider<Activity["id"], Activi
 type ListViewProps = ComponentProps<"oj-list-view">;
 const gridlinesItemVisible: ListViewProps["gridlines"] = { item: "visible" };
 
-export function Content() {
+const ItemDetailContainer = () => {
   const [val, setVal] = useState("bar" as ChartProps["type"]);
 
   const valChangeHandler = useCallback(
@@ -136,3 +136,5 @@ export function Content() {
     </div>
   );
 }
+
+export default ItemDetailContainer;
