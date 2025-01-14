@@ -117,7 +117,7 @@ const ItemDetailContainer = () => {
         </oj-list-view>
       </div> */}
 
-      <div id="itemDetailsContainer" class="oj-bg-neutral-30">
+      <div id="itemDetailsContainer" class="oj-flex-item oj-bg-neutral-30 oj-sm-padding-4x-start oj-md-6 oj-sm-12">
         {/*  Simple example of using components and using useState/useCallback to pass data in same page level*/}
         <h3>Item Details</h3>
         <oj-label for={"basicSelect"}>Select Chart</oj-label>

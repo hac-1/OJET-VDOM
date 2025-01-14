@@ -16,3 +16,4 @@ Useful Links
 - https://www.oracle.com/webfolder/technetwork/jet/public_samples/JET-VComponent-Tutorial-VDOM/public_html/index.html?ojr=welcome
 - https://www.oracle.com/webfolder/technetwork/jet/jetCookbook.html
 - https://docs.oracle.com/en/middleware/developer-tools/jet/17.1/reference-api/index.html
+- https://docs.oracle.com/en/middleware/developer-tools/jet/17.1/reference-api/FlexLayout.html -> Responsive/Flex Layout

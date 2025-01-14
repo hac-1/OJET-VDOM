@@ -2,7 +2,7 @@ import { h, ComponentProps } from "preact";
 
 const ActivityContainer = () => {
     return (
-        <div id="activitiesContainer" class="oj-bg-info-30">
+        <div id="activitiesContainer" class="oj-flex oj-flex-item oj-bg-info-30 oj-sm-only-text-align-end oj-sm-padding-4x-start oj-md-4 oj-sm-12">
             <h3 id="activitiesHeader">Activities</h3>
             <div id="activitiesItems" class="item-display no-wrap">
                 <ul>
