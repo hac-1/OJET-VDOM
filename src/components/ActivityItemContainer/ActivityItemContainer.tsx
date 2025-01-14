@@ -1,6 +1,6 @@
 import { h, ComponentProps } from "preact";
 import * as ResponsiveUtils from "ojs/ojresponsiveutils";
-import { useRef, useState } from "preact/hooks";
+import { useEffect, useRef, useState } from "preact/hooks";
 
 // Display this content for medium and narrower screen widths
 const sm_md_view =
@@ -30,6 +30,11 @@ const ActivityItemContainer = () => {
   function getDisplayType() {
     return (isSmallMediumWidth ? false : true);
   };
+
+  useEffect(() => {
+    mediaQueryRef.current.addEventListener("change", handleMediaQueryChange);
+    return (() => mediaQueryRef.current.removeEventListener("change", handleMediaQueryChange));
+  }, [mediaQueryRef]);
 
 
   return (
