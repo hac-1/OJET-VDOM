@@ -17,7 +17,6 @@ const sm_md_view =
     </div>
   </div>;
 
-
 const ActivityItemContainer = () => {
   const mediaQueryRef = useRef<MediaQueryList>(window.matchMedia(ResponsiveUtils.getFrameworkQuery("md-down")!));
 
