@@ -11,6 +11,7 @@ Deploy build can be created using `npx ojet build web --release`
 
 
 Useful Links
+- https://docs.oracle.com/en/middleware/developer-tools/jet/17.1/vdom-tutorials.html
 - https://docs.oracle.com/en/middleware/developer-tools/jet/17.1/virtual-dom-apps-learning-paths.html
 - https://docs.oracle.com/en/middleware/developer-tools/jet/17.1/vdom/index.html
 - https://www.oracle.com/webfolder/technetwork/jet/public_samples/JET-VComponent-Tutorial-VDOM/public_html/index.html?ojr=welcome
