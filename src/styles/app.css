@@ -78,3 +78,23 @@ html[dir="rtl"] .demo-oracle-icon {
     max-width: 40px;
     margin-right: 10px;
 }
+
+.hr-margin {
+    margin-top: 12px;
+}
+
+.data-name {
+    font-size: 20px;
+    font-weight: bolder;
+}
+
+.data-desc {
+    font-size: 14px;
+    font-weight: 400;
+    font-style: italic;
+    margin-bottom: 10px;
+}
+
+.float-right {
+    float: right;
+}

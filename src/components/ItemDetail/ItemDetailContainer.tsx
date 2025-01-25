@@ -10,6 +10,7 @@ import * as storeData from "text!../store_data.json";
 import "ojs/ojlistview";
 import { ojListView } from "ojs/ojlistview";
 import "ojs/ojlistitemlayout";
+import "ojs/ojavatar";
 
 
 type ChartType = {
@@ -64,15 +65,36 @@ const activityDataProvider = new MutableArrayDataProvider<Activity["id"], Activi
 type ListViewProps = ComponentProps<"oj-list-view">;
 const gridlinesItemVisible: ListViewProps["gridlines"] = { item: "visible" };
 
-const ItemDetailContainer = () => {
-  const [val, setVal] = useState("bar" as ChartProps["type"]);
 
-  const valChangeHandler = useCallback(
-    (event: ojSelectSingle.valueChanged<ChartType["value"], ChartType>) => {
-      setVal(event.detail.value as ChartProps["type"]);
-    },
-    [val, setVal]
-  );
+type Props = {
+  item?: Item | null;
+};
+
+type Item = {
+  id: number;
+  name: string;
+  short_desc?: string;
+  price?: number;
+  quantity?: number;
+  quantity_shipped?: number;
+  quantity_instock?: number;
+  activity_id?: number;
+  image?: string;
+};
+
+
+
+
+
+const ItemDetailContainer = (props: Props) => {
+  // const [val, setVal] = useState("bar" as ChartProps["type"]);
+
+  // const valChangeHandler = useCallback(
+  //   (event: ojSelectSingle.valueChanged<ChartType["value"], ChartType>) => {
+  //     setVal(event.detail.value as ChartProps["type"]);
+  //   },
+  //   [val, setVal]
+  // );
 
   // Function on how to render a chart item - will be used in template
   const chartItem = (
@@ -81,7 +103,7 @@ const ItemDetailContainer = () => {
     return (
       <oj-chart-item
         value={item.data.value}
-        groupId={[item.data.group]}
+        groupId={[0]}
         seriesId={item.data.series}></oj-chart-item>
     );
   };
@@ -102,6 +124,14 @@ const ItemDetailContainer = () => {
   //     );
   //   };
 
+  const pieDataProvider: MutableArrayDataProvider<ChartItem["id"], ChartItem> = new MutableArrayDataProvider(
+    [
+      { series: "Quantity in Stock", value: props.item?.quantity_instock },
+      { series: "Quantity shipped", value: props.item?.quantity_shipped },
+    ],
+    { keyAttributes: "id" }
+  );
+
   return (
     <div class="oj-web-applayout-max-width oj-web-applayout-content">
       {/* <h1>Product Information</h1> */}
@@ -118,8 +148,9 @@ const ItemDetailContainer = () => {
       </div> */}
 
       <div id="itemDetailsContainer" class="oj-flex-item oj-bg-neutral-30 oj-sm-padding-4x-start oj-md-6 oj-sm-12">
-        {/*  Simple example of using components and using useState/useCallback to pass data in same page level*/}
         <h3>Item Details</h3>
+        {/*  Simple example of using components and using useState/useCallback to pass data in same page level*/}
+        {/* 
         <oj-label for={"basicSelect"}>Select Chart</oj-label>
         <oj-select-single
           id={"basicSelect"}
@@ -127,11 +158,27 @@ const ItemDetailContainer = () => {
           class={"selectSingleStyle"}
           data={chartTypesDP}
           onvalueChanged={valChangeHandler}
-        ></oj-select-single>
+        ></oj-select-single> 
+
+        
         <oj-chart id="barChart" type={val} data={chartDataProvider} animationOnDisplay="auto"
           animationOnDataChange="auto" hoverBehavior="dim" class="chartStyle">
           <template slot="itemTemplate" render={chartItem}></template>
         </oj-chart>
+        */}
+        <hr class="hr-margin" />
+        <oj-avatar role="img" size="lg" aria-label={"product image for" + props.item?.name}
+          src={props.item?.image?.replace("css", "styles")} class="float-right"></oj-avatar>
+        <div id="itemName" class="data-name">{props.item?.name}</div>
+        <div id="itemDesc" class="data-desc">{props.item?.short_desc}</div>
+        <div id="itemPrice">{"Price: " + props.item?.price + " each"}</div>
+        <div id="itemId">{"Item Id: " + props.item?.id}</div>
+
+        <oj-chart id="pieChart" type="pie" data={pieDataProvider} animationOnDisplay="auto"
+          animationOnDataChange="auto" hoverBehavior="dim" class="chartStyle">
+          <template slot="itemTemplate" render={chartItem}></template>
+        </oj-chart>
+
       </div>
     </div>
   );
