@@ -2,7 +2,7 @@ import { h, ComponentProps } from "preact";
 import * as ResponsiveUtils from "ojs/ojresponsiveutils";
 import "ojs/ojlistview";
 import { ojListView } from "ojs/ojlistview";
-import { useEffect, useRef, useState } from "preact/hooks";
+import { useCallback, useEffect, useRef, useState } from "preact/hooks";
 import MutableArrayDataProvider = require("ojs/ojmutablearraydataprovider");
 
 // Display this content for medium and narrower screen widths
@@ -24,6 +24,9 @@ const sm_md_view =
 type Props = {
   data?: MutableArrayDataProvider<ActivityItem["id"], ActivityItem>;
   value?: string;
+  selectedActivity: Item | null
+  onItemChanged: (item: Item) => void;
+
 };
 
 type Item = {
@@ -66,6 +69,7 @@ const listItemRenderer = (item: ojListView.ItemTemplateContext) => {
 type ListViewProps = ComponentProps<"oj-list-view">;
 const gridlinesItemVisible: ListViewProps["gridlines"] = { item: "visible" };
 const scrollPolicyOpts: ListViewProps["scrollPolicyOptions"] = { fetchSize: 5 };
+const DEFAULT_ACTIVITY_ITEM_STATE: Partial<Item> = {};
 
 const ActivityItemContainer = (props: Props) => {
   const mediaQueryRef = useRef<MediaQueryList>(window.matchMedia(ResponsiveUtils.getFrameworkQuery("md-down")!));
@@ -86,28 +90,40 @@ const ActivityItemContainer = (props: Props) => {
   }, [mediaQueryRef]);
 
 
+  const activityItemDataProvider = props.data;
+
+  const [activityItemValue, setActivityItemValue] = useState(
+    DEFAULT_ACTIVITY_ITEM_STATE
+  );
+
+  const [itemData, setItemData] = useState<Item>(props.selectedActivity!);
+
+  const selectedActivityItemChanged = useCallback(
+    (event: ojListView.firstSelectedItemChanged<Item["id"], Item>) => {
+      let tempItem = event.detail.value.data;
+      props.onItemChanged(tempItem);
+      setActivityItemValue(tempItem);
+      setItemData(tempItem);
+    },
+    [activityItemValue]
+  );
+
   return (
-    getDisplayType() ? <div id="activityItemsContainer" class="oj-flex-item oj-bg-success-20 oj-sm-padding-4x-start oj-md-6 oj-sm-12">
-      <div id="container" class="item-display no-wrap">
+    getDisplayType() ? <div
+      id="activityItemsContainer"
+      class="oj-flex-item oj-sm-padding-4x-start oj-md-6 oj-sm-12">
+      <div id="container">
         <h3>Activity Items</h3>
-        {/* <ul>
-          <li class="li-item">Louisville Slugger Bat</li>
-          <li class="li-item">SureCatch Baseball Glove</li>
-          <li class="li-item">Baseball</li>
-          <li class="li-item">Western R16 Helmet</li>
-          <li class="li-item">Western C1 Helmet</li>
-          <li class="li-item">Sure Fire Ball (Set of 4)</li>
-        </ul> */}
         <oj-list-view
-          id="itemsList"
+          id="activitiesList"
           class="item-display"
           aria-labelledby="activitiesHeader"
-          data={props.data}
+          data={activityItemDataProvider}
           gridlines={gridlinesItemVisible}
           selectionMode="single"
+          onfirstSelectedItemChanged={selectedActivityItemChanged}
           scrollPolicy="loadMoreOnScroll"
-          scrollPolicyOptions={scrollPolicyOpts}
-        >
+          scrollPolicyOptions={scrollPolicyOpts}>
           <template slot="itemTemplate" render={listItemRenderer}></template>
         </oj-list-view>
       </div>

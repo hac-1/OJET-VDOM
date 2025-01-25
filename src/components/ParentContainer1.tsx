@@ -1,3 +1,4 @@
+import { useState } from "preact/hooks";
 import ActivityContainer from "./Activity/ActivityContainer";
 import ParentContainer2 from "./ParentContainer2";
 import MutableArrayDataProvider = require('ojs/ojmutablearraydataprovider');
@@ -16,11 +17,44 @@ const activityDataProvider = new MutableArrayDataProvider<Activity['id'], Activi
     }
 );
 
+type Item = {
+    id: number;
+    name: string;
+    short_desc?: string;
+    price?: number;
+    quantity?: number;
+    quantity_shipped?: number;
+    quantity_instock?: number;
+    activity_id?: number;
+    image?: string;
+};
+
+let INIT_SELECTEDACTIVITY: Item | null = null;
+
 const ParentContainer1 = () => {
+    const [selectedActivity, setSelectedActivity] = useState<Item | null>(
+        INIT_SELECTEDACTIVITY
+    );
+
+    const showActivityItems = () => {
+        return selectedActivity != null;
+    };
+
+    const activityChangedHandler = (value: Item) => {
+        setSelectedActivity(value);
+    };
+
     return (
-        <div id="parentContainer1" class="oj-flex oj-flex-init oj-panel oj-bg-warning-20">
-            <ActivityContainer data={activityDataProvider} />
-            <ParentContainer2 />
+        <div id="parentContainer1" class="oj-flex oj-flex-init">
+            <ActivityContainer data={activityDataProvider} onActivityChanged={activityChangedHandler} />
+            {showActivityItems() && (
+                <ParentContainer2 activity={selectedActivity} />
+            )}
+            {!showActivityItems() && (
+                <h4 class="oj-typography-subheading-sm">
+                    Select activity to view items
+                </h4>
+            )}
         </div>
     );
 };

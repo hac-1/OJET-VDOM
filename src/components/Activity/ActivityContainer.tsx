@@ -1,6 +1,8 @@
+import { KeySet, KeySetImpl } from "ojs/ojkeyset";
 import { ojListView } from "ojs/ojlistview";
 import MutableArrayDataProvider = require("ojs/ojmutablearraydataprovider");
 import { h, ComponentProps } from "preact";
+import { useMemo } from "preact/hooks";
 
 type Activity = {
     id: number;
@@ -9,9 +11,10 @@ type Activity = {
 };
 
 type Props = {
-    data: MutableArrayDataProvider<Activity['id'], Activity>
-    value?: String
-}
+    data?: MutableArrayDataProvider<Activity["id"], Activity>;
+    value?: string;
+    onActivityChanged: (value: Item) => void;
+};
 
 const listItemRenderer = (item: ojListView.ItemTemplateContext) => {
     let image = item.data.image.replace('css', 'styles');
@@ -34,7 +37,31 @@ type ListViewProps = ComponentProps<'oj-list-view'>
 const gridlinesItemVisible: ListViewProps['gridlines'] = { item: 'visible' };
 const scrollPolicyOpts: ListViewProps['scrollPolicyOptions'] = { fetchSize: 5 };
 
+type Item = {
+    id: number;
+    name: string;
+    short_desc?: string;
+    price?: number;
+    quantity?: number;
+    quantity_shipped?: number;
+    quantity_instock?: number;
+    activity_id?: number;
+    image?: string;
+};
+
+
+
 const ActivityContainer = (props: Props) => {
+    const selectedActivityChanged = (
+        event: ojListView.firstSelectedItemChanged<Item["id"], Item>
+    ) => {
+        props.onActivityChanged(event.detail.value.data);
+    };
+
+    const activityValue = useMemo(() => {
+        return new KeySetImpl([props.value]) as KeySet<Activity["name"]>;
+    }, [props.value]);
+
     return (
         <div id="activitiesContainer" class="oj-flex-item oj-bg-info-30 oj-sm-only-text-align-end oj-sm-padding-4x-start oj-md-4 oj-sm-12">
             <h3 id="activitiesHeader">Activities</h3>
@@ -53,6 +80,8 @@ const ActivityContainer = (props: Props) => {
                 scrollPolicy={"loadMoreOnScroll"}
                 gridlines={gridlinesItemVisible}
                 scrollPolicyOptions={scrollPolicyOpts}
+                selected={activityValue}
+                onfirstSelectedItemChanged={selectedActivityChanged}
             >
                 <template slot={"itemTemplate"} render={listItemRenderer}></template>
             </oj-list-view>
