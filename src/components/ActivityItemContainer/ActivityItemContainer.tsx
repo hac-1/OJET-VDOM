@@ -4,11 +4,12 @@ import { ojListView } from "ojs/ojlistview";
 import { useState, useCallback, MutableRef, useRef } from "preact/hooks";
 import { RESTDataProvider } from "ojs/ojrestdataprovider";
 import ItemActionsContainer from "./ItemActionsContainer";
-import CreateNewItemDialog from "./CreateNewItemDialog";
 import "ojs/ojformlayout";
 import "ojs/ojinputtext";
 import { ojDialog } from "ojs/ojdialog";
+import CreateNewItemDialog from "./CreateNewItemDialog";
 import EditItemDialog from "./EditItemDialog";
+import DeleteItemDialog from "./DeleteItemDialog";
 
 type Props = {
   data?: RESTDataProvider<any, any>;
@@ -58,6 +59,7 @@ const ActivityItemContainer = (props: Props) => {
 
   const [isCreateOpened, setIsCreateOpened] = useState<boolean>(false);
   const [isEditOpened, setIsEditOpened] = useState<boolean>(false);
+  const [isDeleteOpened, setIsDeleteOpened] = useState<boolean>(false);
   const [itemData, setItemData] = useState<Item>(props.selectedActivity!);
 
   const openCreateDialog = () => {
@@ -81,7 +83,7 @@ const ActivityItemContainer = (props: Props) => {
   );
 
   const handleDialogClose = (ref: MutableRef<ojDialog>, type: string) => {
-    type === "create" ? setIsCreateOpened(false) : setIsEditOpened(false);
+    type === "create" ? setIsCreateOpened(false) : type === "edit" ? setIsEditOpened(false) : setIsDeleteOpened(false);
     ref.current.close();
   };
 
@@ -162,15 +164,52 @@ const ActivityItemContainer = (props: Props) => {
     editDialogRef.current?.close();
   };
 
+  const openDeleteDialog = () => {
+    setIsDeleteOpened(true);
+  }
+
+  const deleteItem = async (deleteItemData: Partial<Item>, deleteDialogRef = useRef<ojDialog>()) => {
+    const request = new Request(`${restServerURLItems}${deleteItemData.id}`, {
+      method: "DELETE",
+    });
+    const response = await fetch(request);
+    // Call  mutate method to notify dataprovider consumers that an 
+    // item has been removed
+    if (response.status === 200) {
+      const removedRowKey = deleteItemData.id;
+      const removedRowMetaData = { key: removedRowKey };
+
+      props.data?.mutate({
+        remove: {
+          data: [deleteItemData.id],
+          keys: new Set([removedRowKey]),
+          metadata: [removedRowMetaData],
+        },
+      });
+
+      deleteDialogRef.current?.close();
+      setIsDeleteOpened(false);
+    }
+    else {
+      alert(
+        "Delete failed with status "
+        + response.status + " : " + response.statusText
+      );
+    }
+    console.log("Deleted item.");
+  }
+
+
   return (
     <div
       id="activityItemsContainer"
       class="oj-flex-item oj-sm-padding-4x-start oj-md-6 oj-sm-12">
       <div id="container">
         <h3>Activity Items</h3>
-        <ItemActionsContainer create={openCreateDialog} itemSelected={activityItemValue} edit={openEditDialog} />
+        <ItemActionsContainer create={openCreateDialog} itemSelected={activityItemValue} edit={openEditDialog} delete={openDeleteDialog} />
         <CreateNewItemDialog isOpened={isCreateOpened} createNewItem={createItem} closeDialog={handleDialogClose} />
         <EditItemDialog isOpened={isEditOpened} editItem={editItem} closeDialog={handleDialogClose} itemData={itemData} />
+        <DeleteItemDialog isOpened={isDeleteOpened} deleteItem={deleteItem} closeDialog={handleDialogClose} itemData={itemData} />
         <oj-list-view
           id="itemsList"
           class="item-display"

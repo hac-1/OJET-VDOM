@@ -5,6 +5,7 @@ import { useState, useEffect } from "preact/hooks";
 type Props = {
     create: () => void;
     edit: () => void;
+    delete: () => void;
     itemSelected: Partial<Item>;
 };
 
@@ -39,6 +40,7 @@ const ItemActionsContainer = (props: Props) => {
         <div>
             <oj-button id="createButton" onojAction={props.create}>Create</oj-button>
             <oj-button id="updateButton" disabled={hideActions} onojAction={props.edit}>Update</oj-button>
+            <oj-button id="updateButton" disabled={hideActions} onojAction={props.delete}>Delete</oj-button>
         </div>
     );
 };
