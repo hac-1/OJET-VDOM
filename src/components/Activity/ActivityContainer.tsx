@@ -1,6 +1,7 @@
 import { KeySet, KeySetImpl } from "ojs/ojkeyset";
 import { ojListView } from "ojs/ojlistview";
 import MutableArrayDataProvider = require("ojs/ojmutablearraydataprovider");
+import { RESTDataProvider } from "ojs/ojrestdataprovider";
 import { h, ComponentProps } from "preact";
 import { useMemo } from "preact/hooks";
 
@@ -11,7 +12,8 @@ type Activity = {
 };
 
 type Props = {
-    data?: MutableArrayDataProvider<Activity["id"], Activity>;
+    data?: RESTDataProvider<Activity["id"], Activity>;
+    //data?: MutableArrayDataProvider<Activity["id"], Activity>;
     value?: string;
     onActivityChanged: (value: Item) => void;
 };

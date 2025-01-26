@@ -4,6 +4,8 @@ import ActivityItemContainer from "./ActivityItemContainer/ActivityItemContainer
 import MutableArrayDataProvider = require("ojs/ojmutablearraydataprovider");
 import * as storeData from 'text!./store_data.json';
 import { useCallback, useEffect, useState } from "preact/hooks";
+import { RESTDataProvider } from "ojs/ojrestdataprovider";
+import { TextFilter } from "ojs/ojdataprovider";
 
 type Item = {
     id: number;
@@ -33,8 +35,23 @@ const activityData = JSON.parse(storeData);
 let activityItemsArray = activityData[0].items
 
 // Create data provider instance for the array of activity items for the Baseball activity
-const INIT_DATAPROVIDER = new MutableArrayDataProvider<ActivityItem["id"], ActivityItem>(activityItemsArray, {
-    keyAttributes: "id",
+// const INIT_DATAPROVIDER = new MutableArrayDataProvider<ActivityItem["id"], ActivityItem>(activityItemsArray, {
+//     keyAttributes: "id",
+// });
+
+const baseServiceUrl = 'https://apex.oracle.com/pls/apex/oraclejet/lp/activities/';
+//Dummy data provider
+let INIT_DATAPROVIDER = new RESTDataProvider<ActivityItem['id'], ActivityItem>({
+    keyAttributes: 'id',
+    url: baseServiceUrl,
+    transforms: {
+        fetchFirst: {
+            request: null!,
+            response: (): any => {
+                return { data: [] };
+            },
+        },
+    },
 });
 
 
@@ -54,11 +71,52 @@ const ParentContainer2 = (props: Props) => {
     }, [selectedItemVal]);
 
     useEffect(() => {
-        let actID = (props.activity!.id) - 1;
-        let activityItemsArray = activityData[actID].items;
+        // let actID = (props.activity!.id) - 1;
+        // let activityItemsArray = activityData[actID].items;
         setactivityItemDP(
-            new MutableArrayDataProvider<ActivityItem["id"], ActivityItem>(activityItemsArray, {
+            // new MutableArrayDataProvider<ActivityItem["id"], ActivityItem>(activityItemsArray, {
+            //     keyAttributes: "id",
+            // })
+
+            new RESTDataProvider<ActivityItem["id"], ActivityItem>({
+                url: baseServiceUrl + props.activity?.id + "/items/",
                 keyAttributes: "id",
+                capabilities: {
+                    filter: {
+                        textFilter: true,
+                    },
+                },
+                textFilterAttributes: ["name"],
+                transforms: {
+                    fetchFirst: {
+                        request: async (options) => {
+                            const url = new URL(options.url)
+
+                            url.searchParams.set('limit', String(options.fetchParameters.size));
+                            url.searchParams.set('offset', String(options.fetchParameters.offset))
+
+                            const filterCriterion = options.fetchParameters
+                                .filterCriterion as TextFilter<Item>;
+                            const { textFilterAttributes } = options.fetchOptions;
+                            if (
+                                filterCriterion &&
+                                filterCriterion.text &&
+                                textFilterAttributes
+                            ) {
+                                const { text } = filterCriterion;
+                                textFilterAttributes.forEach((attribute) => {
+                                    url.searchParams.set(attribute, text);
+                                });
+                            }
+
+                            return new Request(url);
+                        },
+                        response: async (res) => {
+                            const { items, totalSize, hasMore } = res.body;
+                            return { data: items, totalSize, hasMore };
+                        }
+                    }
+                }
             })
         );
     }, [props.activity]);

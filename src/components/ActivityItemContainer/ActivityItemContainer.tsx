@@ -4,6 +4,7 @@ import "ojs/ojlistview";
 import { ojListView } from "ojs/ojlistview";
 import { useCallback, useEffect, useRef, useState } from "preact/hooks";
 import MutableArrayDataProvider = require("ojs/ojmutablearraydataprovider");
+import { RESTDataProvider } from "ojs/ojrestdataprovider";
 
 // Display this content for medium and narrower screen widths
 const sm_md_view =
@@ -22,7 +23,7 @@ const sm_md_view =
 
 
 type Props = {
-  data?: MutableArrayDataProvider<ActivityItem["id"], ActivityItem>;
+  data?: RESTDataProvider<ActivityItem["id"], ActivityItem>;
   value?: string;
   selectedActivity: Item | null
   onItemChanged: (item: Item) => void;
