@@ -1,33 +1,19 @@
 import { h, ComponentProps } from "preact";
-import * as ResponsiveUtils from "ojs/ojresponsiveutils";
 import "ojs/ojlistview";
 import { ojListView } from "ojs/ojlistview";
-import { useCallback, useEffect, useRef, useState } from "preact/hooks";
-import MutableArrayDataProvider = require("ojs/ojmutablearraydataprovider");
+import { useState, useCallback } from "preact/hooks";
 import { RESTDataProvider } from "ojs/ojrestdataprovider";
-
-// Display this content for medium and narrower screen widths
-const sm_md_view =
-  <div id="sm_md" class="oj-flex-item oj-sm-padding-4x-start oj-md-6 oj-sm-12"
-    style="background-color:lightcyan; padding: 10px; font-size: 10px">
-    <h3 id="activityDetailsHeader">Activity Details</h3>
-    <div class="item-display no-wrap">
-      <ul>
-        <li class="li-item">SureCatch Baseball Glove</li>
-        <li class="li-item">Western R16 Helmet</li>
-        <li class="li-item">Western C1 Helmet</li>
-        <li class="li-item">Western Bat</li>
-      </ul>
-    </div>
-  </div>;
-
+import ItemActionsContainer from "./ItemActionsContainer";
+import CreateNewItemDialog from "./CreateNewItemDialog";
+import "ojs/ojformlayout";
+import "ojs/ojinputtext";
+import { ojDialog } from "ojs/ojdialog";
+import { MutableRef } from "preact/hooks";
 
 type Props = {
   data?: RESTDataProvider<ActivityItem["id"], ActivityItem>;
-  value?: string;
-  selectedActivity: Item | null
+  selectedActivity: Item | null;
   onItemChanged: (item: Item) => void;
-
 };
 
 type Item = {
@@ -50,6 +36,8 @@ type ActivityItem = {
   image: string;
 };
 
+const DEFAULT_ACTIVITY_ITEM_STATE: Partial<Item> = {};
+
 const listItemRenderer = (item: ojListView.ItemTemplateContext) => {
   const image = item.data.image.replace("css", "styles");
   return (
@@ -70,34 +58,25 @@ const listItemRenderer = (item: ojListView.ItemTemplateContext) => {
 type ListViewProps = ComponentProps<"oj-list-view">;
 const gridlinesItemVisible: ListViewProps["gridlines"] = { item: "visible" };
 const scrollPolicyOpts: ListViewProps["scrollPolicyOptions"] = { fetchSize: 5 };
-const DEFAULT_ACTIVITY_ITEM_STATE: Partial<Item> = {};
 
 const ActivityItemContainer = (props: Props) => {
-  const mediaQueryRef = useRef<MediaQueryList>(window.matchMedia(ResponsiveUtils.getFrameworkQuery("md-down")!));
-
-  const [isSmallMediumWidth, setIsSmallMediumWidth] = useState(mediaQueryRef.current.matches);
-
-  function handleMediaQueryChange(e: MediaQueryListEvent) {
-    setIsSmallMediumWidth(e.matches);
-  }
-
-  function getDisplayType() {
-    return (isSmallMediumWidth ? false : true);
-  };
-
-  useEffect(() => {
-    mediaQueryRef.current.addEventListener("change", handleMediaQueryChange);
-    return (() => mediaQueryRef.current.removeEventListener("change", handleMediaQueryChange));
-  }, [mediaQueryRef]);
-
 
   const activityItemDataProvider = props.data;
+  const restServerURLItems = "https://apex.oracle.com/pls/apex/oraclejet/lp/activities/" + props.selectedActivity?.id + "/items/";
+
+  const [isCreateOpened, setIsCreateOpened] = useState<boolean>(false);
+  const [isEditOpened, setIsEditOpened] = useState<boolean>(false);
+  const [itemData, setItemData] = useState<Item>(props.selectedActivity!);
+
+  const openCreateDialog = () => {
+    console.log("CreateNewItemDialog called");
+    setIsCreateOpened(true);
+  };
 
   const [activityItemValue, setActivityItemValue] = useState(
     DEFAULT_ACTIVITY_ITEM_STATE
   );
 
-  const [itemData, setItemData] = useState<Item>(props.selectedActivity!);
 
   const selectedActivityItemChanged = useCallback(
     (event: ojListView.firstSelectedItemChanged<Item["id"], Item>) => {
@@ -109,14 +88,55 @@ const ActivityItemContainer = (props: Props) => {
     [activityItemValue]
   );
 
+  const handleDialogClose = (ref: MutableRef<ojDialog>, type: string) => {
+    type === "create" ? setIsCreateOpened(false) : setIsEditOpened(false);
+    ref.current.close();
+  };
+
+  const createItem = async (data: Partial<Item>, createDialogRef: MutableRef<ojDialog>) => {
+    //process create command and close dialog on success
+    if (data?.name) {
+      let quantity = Number(data.quantity_instock) + Number(data.quantity_shipped);
+      const row = {
+        name: data.name,
+        short_desc: data.short_desc,
+        price: data.price,
+        quantity_instock: data.quantity_instock,
+        quantity_shipped: data.quantity_shipped,
+        quantity: quantity,
+        activity_id: props.selectedActivity?.id,
+        image: "css/images/product_images/jet_logo_256.png",
+      };
+
+      // Create and send request to REST service to add row
+      const request = new Request(restServerURLItems, {
+        headers: new Headers({
+          "Content-type": "application/json; charset=UTF-8",
+        }),
+        body: JSON.stringify(row),
+        method: "POST",
+      });
+
+      const response = await fetch(request);
+      const addedRow = await response.json();
+
+      activityItemDataProvider?.refresh();
+      // Close dialog
+      console.log("Created new item");
+      createDialogRef.current.close();
+    }
+  };
+
   return (
-    getDisplayType() ? <div
+    <div
       id="activityItemsContainer"
       class="oj-flex-item oj-sm-padding-4x-start oj-md-6 oj-sm-12">
       <div id="container">
         <h3>Activity Items</h3>
+        <ItemActionsContainer create={openCreateDialog} />
+        <CreateNewItemDialog isOpened={isCreateOpened} createNewItem={createItem} closeDialog={handleDialogClose} />
         <oj-list-view
-          id="activitiesList"
+          id="itemsList"
           class="item-display"
           aria-labelledby="activitiesHeader"
           data={activityItemDataProvider}
@@ -129,7 +149,6 @@ const ActivityItemContainer = (props: Props) => {
         </oj-list-view>
       </div>
     </div>
-      : sm_md_view
   );
 };
 
