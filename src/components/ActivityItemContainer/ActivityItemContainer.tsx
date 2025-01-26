@@ -1,17 +1,17 @@
 import { h, ComponentProps } from "preact";
 import "ojs/ojlistview";
 import { ojListView } from "ojs/ojlistview";
-import { useState, useCallback } from "preact/hooks";
+import { useState, useCallback, MutableRef, useRef } from "preact/hooks";
 import { RESTDataProvider } from "ojs/ojrestdataprovider";
 import ItemActionsContainer from "./ItemActionsContainer";
 import CreateNewItemDialog from "./CreateNewItemDialog";
 import "ojs/ojformlayout";
 import "ojs/ojinputtext";
 import { ojDialog } from "ojs/ojdialog";
-import { MutableRef } from "preact/hooks";
+import EditItemDialog from "./EditItemDialog";
 
 type Props = {
-  data?: RESTDataProvider<ActivityItem["id"], ActivityItem>;
+  data?: RESTDataProvider<any, any>;
   selectedActivity: Item | null;
   onItemChanged: (item: Item) => void;
 };
@@ -26,14 +26,6 @@ type Item = {
   quantity_instock?: number;
   activity_id?: number;
   image?: string;
-};
-
-type ActivityItem = {
-  id: number;
-  name: string;
-  items: Array<Item>;
-  short_desc: string;
-  image: string;
 };
 
 const DEFAULT_ACTIVITY_ITEM_STATE: Partial<Item> = {};
@@ -127,14 +119,58 @@ const ActivityItemContainer = (props: Props) => {
     }
   };
 
+  const openEditDialog = () => {
+    console.log("Item: " + JSON.stringify(itemData));
+    setIsEditOpened(true);
+    console.log("Edit dialog opened");
+  };
+
+  const editItem = async (newItemData: Partial<Item>, editDialogRef = useRef<ojDialog>()) => {
+    if (newItemData != null) {
+      const row = {
+        itemId: newItemData.id,
+        name: newItemData.name,
+        price: newItemData.price,
+        short_desc: newItemData.short_desc,
+      };
+
+      // Create and send request to update row on rest service
+      const request = new Request(`${restServerURLItems}${itemData.id}`, {
+        headers: new Headers({
+          "Content-type": "application/json; charset=UTF-8",
+        }),
+        body: JSON.stringify(row),
+        method: "PUT",
+      });
+      const response = await fetch(request);
+      const updatedRow = await response.json();
+
+      // Create update mutate event and call mutate method
+      // to notify dataprovider consumers that a row has been
+      // updated
+      const updatedRowKey = itemData.id;
+      const updatedRowMetaData = { key: updatedRowKey };
+      props.data?.mutate({
+        update: {
+          data: [updatedRow],
+          keys: new Set([updatedRowKey]),
+          metadata: [updatedRowMetaData],
+        },
+      });
+    } // End if statement
+    console.log("Edited item");
+    editDialogRef.current?.close();
+  };
+
   return (
     <div
       id="activityItemsContainer"
       class="oj-flex-item oj-sm-padding-4x-start oj-md-6 oj-sm-12">
       <div id="container">
         <h3>Activity Items</h3>
-        <ItemActionsContainer create={openCreateDialog} />
+        <ItemActionsContainer create={openCreateDialog} itemSelected={activityItemValue} edit={openEditDialog} />
         <CreateNewItemDialog isOpened={isCreateOpened} createNewItem={createItem} closeDialog={handleDialogClose} />
+        <EditItemDialog isOpened={isEditOpened} editItem={editItem} closeDialog={handleDialogClose} itemData={itemData} />
         <oj-list-view
           id="itemsList"
           class="item-display"
